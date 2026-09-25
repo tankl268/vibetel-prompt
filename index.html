@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vibe-TEL Prompt Generator</title>
+<meta name="description" content="Turn a teaching problem into a build prompt for an interactive, visual, single-file learning tool.">
+<!-- Vibe-TEL Prompt Generator v2.7 (2026-09-25; plainer wording, Evaluate as a short note, health promotion example, no Game mode, editable prompt): Quick start by default, Advanced as a toggle.
+     Earlier versions are in HERGA 2026/Archive (prompt-generator-v1, prompt-generator-v2.0). -->
+<style>
+:root{
+  --navy:#140f50; --blue:#1747ff; --blue-soft:#7f95ff; --lav:#7467c4;
+  --ink:#1b1840; --muted:#5d5a78; --line:rgba(20,15,80,.14); --bg:#f4f5fb; --card:#ffffff;
+  --ok:#16a34a; --hot:#ff5a1f; --teal:#0e9f7e; --amber:#f59e0b;
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --mono: ui-monospace, Consolas, "Cascadia Mono", Menlo, monospace;
+}
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.5}
+a{color:var(--blue)}
+.wrap{max-width:1280px;margin:0 auto;padding:0 20px}
+/* mode visibility */
+body.quick .adv{display:none !important}
+body.adv .quick{display:none !important}
+/* header */
+header.top{background:var(--navy);color:#fff;padding:22px 0 0}
+.toprow{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+.kicker{font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--blue-soft)}
+header.top h1{margin:4px 0 4px;font-size:clamp(26px,3.6vw,38px);line-height:1.1;font-weight:900}
+header.top p{margin:0;color:#c9c6ef;max-width:720px}
+.privacy{font-size:13px;color:#b6b2e3;margin-top:8px}
+.modeswitch{display:inline-flex;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:30px;padding:4px;flex:none;margin-top:6px}
+.modeswitch button{font:inherit;font-size:14px;font-weight:700;border:0;border-radius:24px;padding:8px 16px;cursor:pointer;background:transparent;color:#c9c6ef}
+.modeswitch button[aria-pressed="true"]{background:#fff;color:var(--navy)}
+.phasebar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:20px}
+.phasebar a{display:flex;gap:10px;align-items:center;padding:12px 14px;color:#fff;text-decoration:none;border-top:5px solid var(--c);background:rgba(255,255,255,.04)}
+.phasebar a:hover{background:rgba(255,255,255,.1)}
+.phasebar .n{flex:none;width:30px;height:30px;border-radius:50%;background:var(--c);display:flex;align-items:center;justify-content:center;font-weight:900;font-style:normal}
+.phasebar b{display:block;font-size:16px}
+.phasebar span{display:block;font-size:13px;color:#c9c6ef}
+@media (max-width:640px){.phasebar span{display:none}.phasebar a{padding:10px 8px;gap:6px}.phasebar .n{width:26px;height:26px;font-size:14px}}
+/* layout */
+main.wrap{display:grid;gap:24px;padding-top:22px;padding-bottom:30px}
+body.adv main.wrap{grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr)}
+body.quick main.wrap,body.quick section.evaluate{max-width:880px}
+@media (max-width:920px){body.adv main.wrap{grid-template-columns:1fr}}
+.phasehead{display:flex;align-items:center;gap:12px;margin:0 0 12px}
+.phasehead .n{width:32px;height:32px;border-radius:50%;background:var(--c);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;flex:none}
+.phasehead h2{margin:0;font-size:22px;color:var(--navy)}
+.phasehead p{margin:0;color:var(--muted);font-size:14px}
+.card,.panel{border:1px solid var(--line);border-radius:14px;background:var(--card);padding:18px 20px 20px}
+.card h3,.panel h3{margin:0 0 4px;font-size:17px;color:var(--navy)}
+form{display:flex;flex-direction:column;gap:14px}
+.hint{margin:2px 0 10px;color:var(--muted);font-size:14px}
+label{display:block;font-weight:700;font-size:14px;margin:12px 0 6px;color:var(--navy)}
+label .opt{font-weight:500;color:var(--muted)}
+input[type=text],textarea,select{width:100%;font:inherit;font-size:15px;color:var(--ink);background:#fbfbfe;border:1px solid rgba(20,15,80,.22);border-radius:10px;padding:10px 12px}
+textarea{min-height:80px;resize:vertical}
+#idea{min-height:120px;font-size:16px}
+input:focus,textarea:focus,select:focus{outline:3px solid rgba(23,71,255,.25);border-color:var(--blue)}
+.examples{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:10px;font-size:14px;color:var(--muted)}
+.examples button{font:inherit;font-size:13.5px;font-weight:600;border:0;background:none;color:var(--blue);cursor:pointer;padding:2px 4px;text-decoration:underline;text-underline-offset:3px}
+.btn{font:inherit;font-size:14px;font-weight:700;border-radius:30px;padding:8px 14px;cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--navy);text-decoration:none;display:inline-block}
+.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.primary:hover{background:#0f36d6}
+.btn.big{font-size:18px;padding:14px 26px}
+.btn.done{background:var(--ok);border-color:var(--ok);color:#fff}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.inline-warn{margin:10px 0 0;background:#fff7e8;border-left:5px solid var(--amber);padding:8px 12px;border-radius:0 8px 8px 0;font-size:14px}
+/* interaction tiles */
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+@media (max-width:640px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.tile{position:relative}
+.tile input{position:absolute;opacity:0;pointer-events:none}
+.tile label{margin:0;height:100%;display:flex;gap:8px;align-items:center;padding:10px;border:2px solid var(--line);border-radius:12px;background:#fbfbfe;cursor:pointer;font-weight:700;font-size:14px;color:var(--navy);line-height:1.2}
+body.adv .tile label{flex-direction:column;align-items:flex-start;gap:6px;padding:12px}
+.tile label small{display:none;font-weight:500;color:var(--muted);font-size:12.5px;line-height:1.35}
+body.adv .tile label small{display:block}
+.tile svg{width:26px;height:26px;flex:none}
+body.adv .tile svg{width:32px;height:32px}
+.tile input:checked + label{border-color:var(--blue);background:#eef1ff;box-shadow:0 0 0 3px rgba(23,71,255,.15)}
+.tile input:focus-visible + label{outline:3px solid rgba(23,71,255,.45);outline-offset:2px}
+.styles{display:flex;flex-wrap:wrap;gap:8px}
+.chip{position:relative}
+.chip input{position:absolute;opacity:0;pointer-events:none}
+.chip label{margin:0;display:inline-flex;gap:8px;align-items:center;padding:7px 13px;border:2px solid var(--line);border-radius:30px;cursor:pointer;font-weight:700;font-size:14px;background:#fbfbfe}
+.chip label i{width:13px;height:13px;border-radius:50%;background:var(--sw);display:inline-block}
+.chip input:checked + label{border-color:var(--blue);background:#eef1ff}
+.chip input:focus-visible + label{outline:3px solid rgba(23,71,255,.45);outline-offset:2px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:560px){.row{grid-template-columns:1fr}}
+.checks{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:6px}
+.check{display:flex;gap:8px;align-items:center;font-size:15px;font-weight:500;margin:0;color:var(--ink);cursor:pointer}
+.check input{width:18px;height:18px;accent-color:var(--blue)}
+.always{font-size:13px;color:var(--muted);margin:12px 0 0}
+/* build */
+.out{display:flex;flex-direction:column;gap:14px}
+body.adv .out{position:sticky;top:16px;align-self:start}
+@media (max-width:920px){body.adv .out{position:static}}
+.copyrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.meta{font-size:13px;color:var(--muted);margin-left:auto}
+.warn{display:none;margin:0 0 12px;background:#fff7e8;border-left:5px solid var(--amber);padding:10px 12px;border-radius:0 8px 8px 0;font-size:14px}
+.warn.show{display:block}
+details.prompt{margin-top:12px}
+details.prompt summary{cursor:pointer;font-size:14px;font-weight:700;color:var(--muted)}
+body.adv details.prompt summary{display:none}
+#output{width:100%;min-height:300px;margin-top:10px;font-family:var(--mono);font-size:13px;line-height:1.55;background:#0f0c3a;color:#e9e8ff;border:0;border-radius:10px;padding:14px 16px;resize:vertical}
+body.adv #output{min-height:380px}
+#output:focus{outline:3px solid rgba(127,149,255,.6)}
+.edithint{margin:10px 0 0;font-size:13px;color:var(--muted)}
+.edited{margin:8px 0 0;background:#eef1ff;border-left:5px solid var(--blue);padding:8px 12px;border-radius:0 8px 8px 0;font-size:14px}
+.edited button{font:inherit;font-size:13.5px;font-weight:700;border:0;background:none;color:var(--blue);cursor:pointer;padding:0 0 0 4px;text-decoration:underline;text-underline-offset:3px}
+ol.steps{margin:6px 0 0;padding-left:20px}
+ol.steps li{margin:4px 0}
+.fixes{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.fix{display:flex;gap:10px;align-items:center;justify-content:space-between;background:#fbfbfe;border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-size:14px}
+.fix button{flex:none}
+.buildgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+body.adv .buildgrid{grid-template-columns:1fr}
+@media (max-width:760px){.buildgrid{grid-template-columns:1fr}}
+/* evaluate */
+section.evaluate{padding-bottom:40px}
+.note{display:flex;gap:12px;align-items:flex-start;background:#e8f7f2;border:1px solid rgba(14,159,126,.3);border-radius:14px;padding:14px 18px}
+.note .n{flex:none;width:32px;height:32px;border-radius:50%;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900}
+.note p{margin:4px 0 0;font-size:15px}
+.note b{color:var(--navy)}
+footer{border-top:1px solid var(--line);padding:18px 20px;color:var(--muted);font-size:13px;text-align:center}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+</head>
+<body class="quick">
+<header class="top">
+  <div class="wrap">
+    <div class="toprow">
+      <div>
+        <div class="kicker">Vibe-TEL · Prompt Generator</div>
+        <h1>Build a learning tool with AI</h1>
+        <p>Tell us your idea, choose how students will use it, and copy the prompt into Google AI Studio.</p>
+        <div class="privacy">🔒 What you type stays on your computer.</div>
+      </div>
+      <div class="modeswitch" role="group" aria-label="Mode">
+        <button type="button" id="toQuick" aria-pressed="true">Quick start</button>
+        <button type="button" id="toAdv" aria-pressed="false">Advanced</button>
+      </div>
+    </div>
+    <nav class="phasebar" aria-label="Vibe-TEL phases">
+      <a href="#visualise" style="--c:var(--blue)"><i class="n">1</i><div><b>Visualise</b><span>Describe your idea</span></div></a>
+      <a href="#build" style="--c:var(--hot)"><i class="n">2</i><div><b>Build</b><span>Make it with AI</span></div></a>
+      <a href="#evaluate" style="--c:var(--teal)"><i class="n">3</i><div><b>Evaluate</b><span>Check before students use it</span></div></a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <!-- ===== 1 · VISUALISE ===== -->
+  <section id="visualise" aria-labelledby="visHead">
+    <div class="phasehead" style="--c:var(--blue)"><span class="n">1</span><div><h2 id="visHead">Visualise</h2><p>What do your students find hard?</p></div></div>
+    <form id="form" autocomplete="off">
+      <div class="card">
+        <h3><label for="idea" style="display:inline;margin:0">Your idea</label></h3>
+        <p class="hint">What do students find hard, and what would you like them to do? Two or three sentences will do.</p>
+        <textarea id="idea" placeholder="e.g. Students think adding more nurses always fixes emergency department waiting times. I want them to run a busy shift themselves, change staffing and arrivals, and watch the queue build up or clear."></textarea>
+        <div class="examples" role="group" aria-label="Load an example">
+          <span>No idea yet? Try one of ours:</span>
+          <button type="button" data-example="health">Health management</button>
+          <button type="button" data-example="promo">Health promotion</button>
+          <button type="button" data-example="nursing">Nursing</button>
+          <button type="button" data-example="science">Science</button>
+          <button type="button" data-example="humanities">Humanities</button>
+          <button type="button" data-example="stats">Statistics</button>
+          <button type="button" id="clear" style="color:var(--muted)">Clear</button>
+        </div>
+        <div class="adv">
+          <label for="goal">By the end, students can… <span class="opt">(optional)</span></label>
+          <input type="text" id="goal" placeholder="e.g. predict how staffing and demand affect waiting times">
+          <p class="inline-warn" id="goalWarn" hidden>This sounds like it's about AI or apps. Write what students should learn in <b>your subject</b>.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>How will students use it?</h3>
+        <p class="hint quick">Pick one, or let the AI choose.</p>
+        <p class="hint adv">This shapes the whole tool.</p>
+        <div class="tiles" role="radiogroup" aria-label="Interaction style">
+          <div class="tile"><input type="radio" name="mode" id="m_sim" value="sim"><label for="m_sim"><svg viewBox="0 0 34 34" aria-hidden="true"><rect x="3" y="8" width="28" height="4" rx="2" fill="#c7cffc"/><circle cx="20" cy="10" r="5" fill="#1747ff"/><rect x="3" y="22" width="28" height="4" rx="2" fill="#c7cffc"/><circle cx="10" cy="24" r="5" fill="#ff5a1f"/></svg><span>Simulation<small>Move sliders and watch it change</small></span></label></div>
+          <div class="tile"><input type="radio" name="mode" id="m_drag" value="drag"><label for="m_drag"><svg viewBox="0 0 34 34" aria-hidden="true"><rect x="3" y="4" width="14" height="10" rx="3" fill="#7467c4"/><rect x="15" y="20" width="16" height="10" rx="3" fill="none" stroke="#1747ff" stroke-width="2" stroke-dasharray="3 2"/><path d="M12 15 L19 21" stroke="#1b1840" stroke-width="2"/><path d="M18 18 l3 4 l-5 0z" fill="#1b1840"/></svg><span>Drag and drop<small>Sort, match or label things</small></span></label></div>
+          <div class="tile"><input type="radio" name="mode" id="m_explore" value="explore"><label for="m_explore"><svg viewBox="0 0 34 34" aria-hidden="true"><circle cx="15" cy="15" r="11" fill="#e7ebff" stroke="#1747ff" stroke-width="2"/><circle cx="12" cy="12" r="3" fill="#ff5a1f"/><circle cx="19" cy="18" r="3" fill="#0e9f7e"/><path d="M23 23 L31 31" stroke="#1b1840" stroke-width="3" stroke-linecap="round"/></svg><span>Explorer<small>Click around a diagram</small></span></label></div>
+          <div class="tile"><input type="radio" name="mode" id="m_scenario" value="scenario"><label for="m_scenario"><svg viewBox="0 0 34 34" aria-hidden="true"><circle cx="17" cy="6" r="4" fill="#1747ff"/><path d="M17 10 V17 M17 17 L7 27 M17 17 L27 27" stroke="#1b1840" stroke-width="2" fill="none"/><circle cx="7" cy="28" r="4" fill="#0e9f7e"/><circle cx="27" cy="28" r="4" fill="#ff5a1f"/></svg><span>Scenario<small>Make choices, see what happens</small></span></label></div>
+          <div class="tile"><input type="radio" name="mode" id="m_lab" value="lab"><label for="m_lab"><svg viewBox="0 0 34 34" aria-hidden="true"><path d="M13 3 H21 M14 3 V13 L6 28 Q5 31 9 31 H25 Q29 31 28 28 L20 13 V3" fill="none" stroke="#1b1840" stroke-width="2"/><path d="M9 24 H25 L27.5 29 Q27 30 25 30 H9 Q7 30 7 29Z" fill="#0e9f7e"/></svg><span>Virtual lab<small>Do a procedure step by step</small></span></label></div>
+          <div class="tile"><input type="radio" name="mode" id="m_data" value="data"><label for="m_data"><svg viewBox="0 0 34 34" aria-hidden="true"><rect x="4" y="18" width="5" height="12" fill="#7f95ff"/><rect x="12" y="10" width="5" height="20" fill="#1747ff"/><rect x="20" y="14" width="5" height="16" fill="#7467c4"/><path d="M3 26 Q12 4 31 8" stroke="#ff5a1f" stroke-width="2" fill="none"/></svg><span>Data explorer<small>Change the numbers, watch the chart</small></span></label></div>
+          <div class="tile"><input type="radio" name="mode" id="m_auto" value="auto" checked><label for="m_auto"><svg viewBox="0 0 34 34" aria-hidden="true"><path d="M17 3 L19.5 13 L29 15 L19.5 17.5 L17 28 L14.5 17.5 L5 15 L14.5 13Z" fill="#7467c4"/><circle cx="27" cy="27" r="3" fill="#1747ff"/></svg><span>Let AI pick<small>Gemini chooses what fits</small></span></label></div>
+        </div>
+      </div>
+
+      <!-- Advanced only -->
+      <div class="card adv">
+        <h3>Look</h3>
+        <div class="styles" role="radiogroup" aria-label="Visual style">
+          <div class="chip"><input type="radio" name="style" id="s_clean" value="clean" checked><label for="s_clean"><i style="--sw:#1747ff"></i>Clean</label></div>
+          <div class="chip"><input type="radio" name="style" id="s_bold" value="bold"><label for="s_bold"><i style="--sw:#ff5a1f"></i>Bold</label></div>
+          <div class="chip"><input type="radio" name="style" id="s_play" value="play"><label for="s_play"><i style="--sw:#f59e0b"></i>Playful</label></div>
+          <div class="chip"><input type="radio" name="style" id="s_clin" value="clinical"><label for="s_clin"><i style="--sw:#0e9f7e"></i>Clinical monitor</label></div>
+        </div>
+        <label for="picture">What should the main picture show? <span class="opt">(optional)</span></label>
+        <input type="text" id="picture" placeholder="e.g. A floor plan of the emergency department, patients as dots moving through it">
+      </div>
+
+      <div class="card adv">
+        <h3>Learners and content</h3>
+        <div class="row">
+          <div><label for="level">Level</label>
+            <select id="level"><option value="">Choose a level</option><option>First-year undergraduate</option><option>Later-year undergraduate</option><option>Postgraduate coursework</option><option>Professional or continuing education</option><option>Secondary school</option></select></div>
+          <div><label for="discipline">Discipline</label><input type="text" id="discipline" placeholder="e.g. Health services management"></div>
+        </div>
+        <label for="misc">Things students often get wrong <span class="opt">(one per line)</span></label>
+        <textarea id="misc" placeholder="e.g. Adding one more nurse always cuts waiting time by the same amount"></textarea>
+        <label for="terms">Words for the glossary <span class="opt">(separate with commas)</span></label>
+        <input type="text" id="terms" placeholder="e.g. triage, throughput, bottleneck">
+        <label>Extras</label>
+        <div class="checks">
+          <label class="check"><input type="checkbox" id="s_levels" checked> Levels of difficulty</label>
+          <label class="check"><input type="checkbox" id="s_hints"> Hints or worked example</label>
+          <label class="check"><input type="checkbox" id="s_score"> Score or points</label>
+        </div>
+        <label for="other">Anything else? <span class="opt">(one per line)</span></label>
+        <textarea id="other" placeholder="e.g. Use Australian public hospital examples"></textarea>
+        <p class="always">Every prompt already asks for Help and Glossary buttons, feedback that explains answers, one HTML file that works offline and in your LMS, accessibility, phone support, no student data, and Australian English.</p>
+      </div>
+    </form>
+  </section>
+
+  <!-- ===== 2 · BUILD ===== -->
+  <section class="out" id="build" aria-labelledby="buildHead">
+    <div class="phasehead" style="--c:var(--hot);margin-bottom:0"><span class="n">2</span><div><h2 id="buildHead">Build</h2><p>Copy the prompt, paste it into AI Studio, then fix things one at a time.</p></div></div>
+    <div class="panel">
+      <p class="warn" id="warn">Write <b>your idea</b> first, or pick an example.</p>
+      <div class="copyrow">
+        <button type="button" class="btn primary big" id="copy">Copy prompt</button>
+        <a class="btn" href="https://aistudio.google.com" target="_blank" rel="noopener">Open Google AI Studio ↗</a>
+        <span class="meta adv" id="meta"></span>
+      </div>
+      <details class="prompt" id="promptBox">
+        <summary>Show and edit the prompt</summary>
+        <p class="edithint">You can change anything in the prompt before you copy it.</p>
+        <p class="edited" id="editedBar" hidden>You've edited the prompt, so changes to the form above won't replace your edits. <button type="button" id="regen">Start again from the form</button></p>
+        <label for="output" class="sr">Your prompt (you can edit it)</label>
+        <textarea id="output" spellcheck="true" placeholder="Your prompt will appear here once you describe your idea."></textarea>
+      </details>
+    </div>
+    <div class="buildgrid">
+      <div class="panel">
+        <h3>In AI Studio</h3>
+        <ol class="steps">
+          <li>Open <b>Playground</b>, choose <b>Gemini 3.8 Flash</b>.</li>
+          <li>Paste the prompt, press <b>Run</b>, open the preview.</li>
+          <li>Try it like a student would. Then ask for the one change that would help most.</li>
+          <li>When you're happy, save the code as <code>mytool.html</code>.</li>
+        </ol>
+      </div>
+      <div class="panel">
+        <h3>Things you can ask for</h3>
+        <div class="fixes" id="fixes"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ===== 3 · EVALUATE ===== -->
+<section class="wrap evaluate" id="evaluate" aria-labelledby="evalHead">
+  <div class="note">
+    <span class="n">3</span>
+    <p><b id="evalHead">Evaluate.</b> Before students see it, check the content is right (the AI gives you a "Teacher check" list for this) and ask a colleague to try it.</p>
+  </div>
+</section>
+
+<footer>
+  Vibe-TEL (Vibe coding for Technology Enhanced Learning) · A/Prof Maurizio Costabile, Dr Sarah Davey and Dr Kuan Tan · Adelaide University.<br>
+  Your work is saved in this browser, so it's still here if you refresh the page. Nothing is sent anywhere.
+</footer>
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const TEXT = ['idea','goal','picture','level','discipline','misc','terms','other'];
+  const ADV_TEXT = ['goal','picture','level','discipline','misc','terms','other'];
+  const BOXES = ['s_levels','s_hints','s_score'];
+  const KEY = 'vibetel-promptgen-v2';
+  // A goal about AI or apps usually produces a tool about the tool. ("code" is left out on purpose: "genetic code" is a real biology goal.)
+  const META = /\b(vibe[\s-]*cod\w*|prompt(s|ing)?|programming|chatgpt|gemini|claude|copilot|generative ai|gen ?ai|ai|artificial intelligence|apps?|html)\b/i;
+
+  /* ===== What each choice adds to the prompt. Edit the wording here. ===== */
+  const MODES = {
+    sim: {name:'Interactive simulation', text:[
+      'Students change 2 to 4 controls (sliders, toggles or steppers) that drive a live, animated model of the system.',
+      'Before each run, students predict what will happen. Then the model plays out with animation, and a chart or readout shows the result beside their prediction.',
+      'Add a short set of challenges ("reach this target", "find the tipping point") that make students use the model to answer a question.']},
+    drag: {name:'Drag and drop', text:[
+      'Students drag items (cards, labels, objects or steps) onto a diagram, into groups or into the right order.',
+      'Use pointer events so it works with a mouse and on touch screens, and give a keyboard alternative (select an item, then choose where it goes).',
+      'Items snap into place with a short animation. A Check button marks each placement with colour and gives the reason, and a new round shuffles the items.']},
+    explore: {name:'Clickable visual explorer', text:[
+      'The centre of the screen is a large, detailed diagram or scene drawn in SVG. Each part highlights when the pointer is over it and opens a short explanation when clicked.',
+      'Include a guided tour that steps through the key parts in a sensible order, highlighting each one.',
+      'Finish with a "Find it" challenge that names a part or a function and asks students to click the right place.']},
+    scenario: {name:'Branching scenario', text:[
+      'A realistic situation told in short scenes, each with a simple illustrated setting drawn in SVG (people as simple figures, the key objects, and a status panel such as risk, time, cost or patient condition).',
+      'At each decision point students choose from three plausible options. Each choice changes what happens next and moves the status panel with a visible animation.',
+      'End with a debrief that replays the path the student took, shows where a better choice was available, and explains why.']},
+    lab: {name:'Step-by-step virtual lab or procedure', text:[
+      'Students carry out the procedure themselves on a workbench drawn in SVG, choosing the equipment, amounts and order of steps.',
+      'Every action animates: liquids fill and change colour, readings change, objects move.',
+      'Mistakes have realistic consequences on screen, followed by an explanation and a chance to redo the step. Show the steps completed so far.']},
+    data: {name:'Interactive data explorer', text:[
+      'Students change inputs or choose data, and charts drawn with SVG or canvas update with smooth animation.',
+      'Before each change, students predict the shape of the result. Then the tool compares the prediction with the result.',
+      'Label axes clearly and add a plain-language reading of what the chart now shows.']},
+    auto: {name:'', text:[
+      'Choose the interaction that best fits the idea (for example a simulation, drag and drop, a clickable diagram, a branching scenario or a virtual lab).',
+      'Favour hands-on manipulation of a visual model over reading text and clicking Next.']}
+  };
+  const STYLES = {
+    clean:'clean and modern: a light background, one strong accent colour with one or two supporting colours, generous spacing, rounded panels and soft shadows',
+    bold:'bold and colourful: a saturated palette of three or four colours, large shapes and strong contrast',
+    play:'playful: friendly rounded shapes, cheerful colours, gentle bouncy animation and small celebrations on success',
+    clinical:'clinical: a dark background like a patient monitor, with teal, green and amber accents and crisp lines'
+  };
+  /* ====================================================================== */
+
+  const lines = s => s.split(/\n+/).map(x=>x.replace(/^[\s*\-•]+/,'').trim()).filter(Boolean);
+  const bullets = arr => arr.map(x=>'- '+x).join('\n');
+  const endStop = s => /[.!?]$/.test(s) ? s : s + '.';
+  const radio = name => (document.querySelector('input[name="'+name+'"]:checked')||{}).value;
+  let adv = false, edited = false;
+
+  function build(){
+    // Quick start uses only the idea and the interaction; everything else takes the defaults.
+    const v = {}; TEXT.forEach(k=>v[k] = (!adv && ADV_TEXT.includes(k)) ? '' : $(k).value.trim());
+    const b = adv ? {s_levels:$('s_levels').checked, s_hints:$('s_hints').checked, s_score:$('s_score').checked}
+                  : {s_levels:true, s_hints:false, s_score:false};
+    const mode = radio('mode') || 'auto', style = adv ? (radio('style') || 'clean') : 'clean';
+    const out = [];
+
+    out.push('You are an expert learning designer and a creative front-end developer. Build a polished, highly interactive and visual learning tool that I, a teacher, will give to my own students (for example on a page in Canvas or Moodle). It should feel like a well-made educational simulation that students want to explore, and every part of it should help them learn the idea below.');
+    out.push('## The idea\n' + v.idea);
+    if(v.goal) out.push('## Learning goal\nBy the end, students can ' + endStop(v.goal.replace(/^by the end,?\s*students can\s*/i,'')));
+    const who = [];
+    if(v.level) who.push(v.level + (v.discipline ? ' students in ' + v.discipline : ' students') + '.');
+    else if(v.discipline) who.push('Discipline: ' + v.discipline + '.');
+    out.push('## Learners\n' + (who.length ? who.join(' ') + ' ' : '') + 'Pitch the language, examples and difficulty for the learners the idea describes.');
+
+    const m = MODES[mode];
+    out.push('## Interaction' + (m.name ? ': ' + m.name : '') + '\n' + bullets(m.text));
+
+    const pic = v.picture ? ': ' + v.picture.charAt(0).toLowerCase() + v.picture.slice(1).replace(/[.]$/,'') + '.' : '.';
+    out.push('## Make it visual and alive\n' + bullets([
+      'Build the screen around one large interactive visual that represents the concept itself' + pic + ' Draw it with SVG or HTML canvas, never as a static picture.',
+      'Students act on the visual directly, and it responds at once with smooth animation that shows cause and effect.',
+      'Feedback is visual as well as written: highlights, colour changes and movement, then a short plain-language explanation.',
+      'Style: ' + STYLES[style] + '. Clear typography, simple icons drawn in SVG, a tidy layout with plenty of space.',
+      'Open with a short start screen (title, one sentence on what students will learn, a Start button) and finish with a summary screen.'
+    ]));
+
+    const teach = [
+      'Students think before they see: they predict, choose or commit first, then see the result.',
+      'Wrong answers are possible and tempting' + (v.misc ? ', drawn from these misconceptions:\n' + lines(v.misc).map(x=>'  - '+x).join('\n') : ', based on common student errors.'),
+      'Never give the answer away in labels, headings, colours or hints before the student responds.',
+      'Feedback explains why, names the specific error, and lets the student try again.'
+    ];
+    if(b.s_levels) teach.push('Two or three levels or stages, each a little harder than the last.');
+    teach.push('Use accurate, standard content for this level. Do not invent data, formulas or facts.');
+    teach.push('The summary screen restates the key idea in one or two sentences.');
+    out.push('## How students learn with it\n' + bullets(teach));
+
+    const sup = ['A Help button that opens short, step-by-step instructions.',
+      'A Glossary button with plain-language definitions' + (v.terms ? ', including: ' + v.terms.replace(/\s*,\s*/g, ', ') + '.' : ' of the key terms.')];
+    if(b.s_hints) sup.push('Hints or a worked example students can open before answering.');
+    if(b.s_score) sup.push('A score or points that rise only for correct predictions and answers.');
+    sup.push('A Reset button to start again.');
+    out.push('## Learner support\n' + bullets(sup));
+
+    out.push('## Technical requirements\n' + bullets([
+      'Everything in ONE self-contained HTML file (HTML, CSS and JavaScript together).',
+      'No external libraries, fonts, images or network requests: draw all graphics with SVG, canvas or CSS, so it works offline and inside an LMS.',
+      'Accessible: strong contrast, readable text, labelled controls and keyboard access. Responsive, so it works on a laptop and a phone.',
+      'Collect, store and send no student data. Australian English spelling.',
+      'A plain descriptive title based on the topic. No marketing content (logos, taglines, pricing, sign-up screens or testimonials) and no code or these instructions on screen.'
+    ]));
+    if(v.other) out.push('## Other details\n' + bullets(lines(v.other)));
+    out.push('## Before you finish\nBuild the complete, polished version, not a minimal one. Check that every control, animation and button works. Then give me the whole file in a single code block, with no placeholders and nothing left out.\n\nAfter the code block, add a short section headed "Teacher check" that lists every fact, number, formula and correct answer used in the tool, so I can verify them before students see it.');
+
+    const text = out.join('\n\n');
+    // Once someone edits the prompt by hand, the form no longer overwrites it.
+    if(!edited) $('output').value = v.idea ? text : '';
+    refreshOutput();
+    $('goalWarn').hidden = !(adv && META.test(v.goal));
+  }
+  function refreshOutput(){
+    const t = $('output').value.trim(), ready = !!t;
+    $('copy').disabled = !ready;
+    $('warn').classList.toggle('show', !ready);
+    $('meta').textContent = ready ? t.split(/\s+/).filter(Boolean).length + ' words' : '';
+    $('editedBar').hidden = !edited;
+    save();
+  }
+  $('output').addEventListener('input',()=>{ edited = true; refreshOutput(); });
+  $('regen').addEventListener('click',()=>{
+    if(!confirm('Replace your edited prompt with a fresh one from the form?')) return;
+    edited = false; build();
+  });
+
+  function setMode(isAdv){
+    adv = isAdv;
+    document.body.classList.toggle('adv', adv); document.body.classList.toggle('quick', !adv);
+    $('toQuick').setAttribute('aria-pressed', String(!adv)); $('toAdv').setAttribute('aria-pressed', String(adv));
+    $('promptBox').open = adv || edited;
+    renderFixes(); build();
+  }
+  $('toQuick').addEventListener('click',()=>setMode(false));
+  $('toAdv').addEventListener('click',()=>setMode(true));
+
+  function state(){
+    const d = {}; TEXT.forEach(k=>d[k]=$(k).value); BOXES.forEach(k=>d[k]=$(k).checked);
+    d.mode = radio('mode'); d.style = radio('style'); d.adv = adv;
+    d.edited = edited; d.editedText = edited ? $('output').value : '';
+    return d;
+  }
+  function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state())); }catch(e){} }
+  function load(d){
+    TEXT.forEach(k=>{ if(k in d) $(k).value = d[k]; });
+    BOXES.forEach(k=>{ if(k in d) $(k).checked = !!d[k]; });
+    if(d.mode){ const r = document.querySelector('input[name="mode"][value="'+d.mode+'"]'); if(r) r.checked = true; }
+    if(d.style){ const r = document.querySelector('input[name="style"][value="'+d.style+'"]'); if(r) r.checked = true; }
+  }
+
+  const DEFAULTS = {mode:'auto', style:'clean', s_levels:true, s_hints:false, s_score:false};
+  const EXAMPLES = {
+    health:{mode:'sim', style:'clean',
+      idea:'Students think adding more nurses always fixes emergency department waiting times. I want them to run a busy shift themselves: change how many patients arrive, how many nurses are on and how long treatment takes, and watch the queue build up or clear.',
+      goal:'predict how staffing and demand affect emergency department waiting times',
+      picture:'A floor plan of an emergency department, with patients as coloured dots moving from the door to triage, the waiting room and treatment bays',
+      level:'First-year undergraduate', discipline:'Health services management',
+      misc:'Adding one more nurse always cuts the waiting time by the same amount\nWaiting times rise steadily with demand, rather than sharply as the department nears capacity',
+      terms:'triage, throughput, bottleneck, utilisation', other:'Use Australian public hospital examples'},
+    promo:{mode:'sim', style:'bold',
+      idea:'Students think health campaigns work by giving people information. I want them to run a campaign to cut smoking in a small town over five years, spend a budget across different strategies each year (posters, smoke-free policies, quit support, working with community groups), and see how smoking rates change in different parts of the town.',
+      goal:'explain why action on environments and policy changes behaviour more than information alone',
+      picture:'A map of a small town whose neighbourhoods change colour as smoking rates fall, beside a budget panel for the year',
+      level:'First-year undergraduate', discipline:'Public health and health promotion',
+      misc:'Giving people information is enough to change their behaviour\nOne campaign works the same way for everyone in the community',
+      terms:'Ottawa Charter, social determinants of health, health literacy, health equity',
+      other:'Use Australian examples'},
+    nursing:{mode:'scenario', style:'clinical',
+      idea:'Students miss the early signs of a deteriorating patient on a ward. I want them to look after one post-operative patient over a night shift, see observations change on a monitor, and decide when and how to escalate.',
+      goal:'recognise early deterioration from observations and escalate with ISBAR',
+      picture:'A hospital bed bay at night with a bedside monitor showing heart rate, blood pressure, respiratory rate, oxygen saturation and temperature',
+      level:'Later-year undergraduate', discipline:'Nursing',
+      misc:'A normal blood pressure means the patient is stable\nOne abnormal reading can wait until the next round',
+      terms:'early warning score, escalation, ISBAR, tachypnoea'},
+    science:{mode:'lab', style:'play', s_hints:true, s_score:true,
+      idea:'Students get lost in serial dilution maths. I want them to do a serial dilution at a virtual bench, pipetting between tubes, and see the concentration fall at each step before they calculate the final answer.',
+      goal:'calculate final concentrations in serial dilutions',
+      picture:'A lab bench with a rack of test tubes, a pipette and a stock bottle, the colour fading along the tubes',
+      level:'First-year undergraduate', discipline:'Laboratory science',
+      misc:'Dilution factors add across steps instead of multiplying\nA 1:10 dilution is the same as a 1 in 10 dilution',
+      terms:'stock, aliquot, dilution factor, diluent'},
+    humanities:{mode:'drag', style:'bold',
+      idea:'Students write essays full of claims with no evidence. I want them to build arguments by dragging cards into Claim, Evidence and Reasoning slots, including tempting cards that do not belong.',
+      goal:'distinguish a claim, evidence and reasoning, and assemble a sound argument',
+      picture:'An argument drawn as a bridge: the claim on top, held up by evidence and reasoning pillars that wobble if the wrong card is placed',
+      level:'First-year undergraduate', discipline:'Humanities and social sciences',
+      misc:'A quotation on its own is enough to support a claim\nA strongly worded opinion counts as evidence',
+      terms:'claim, evidence, warrant, counter-argument'},
+    stats:{mode:'data', style:'clean',
+      idea:'Students cannot see why larger samples give more precise estimates. I want them to draw samples of different sizes from a population and watch the spread of the sample means shrink.',
+      goal:'explain why larger samples give more precise estimates',
+      picture:'A population histogram on top and a sampling distribution filling up below it, dot by dot',
+      level:'Later-year undergraduate', discipline:'Statistics and research methods',
+      misc:'Larger samples reduce the spread of the individual data values\nA larger sample changes the population mean',
+      terms:'population, sample, mean, standard error'}
+  };
+  document.querySelectorAll('[data-example]').forEach(btn=>btn.addEventListener('click',()=>{
+    const d = Object.assign({}, DEFAULTS, EXAMPLES[btn.dataset.example]);
+    TEXT.forEach(k=>{ if(!(k in d)) d[k]=''; });
+    edited = false; load(d); build();
+  }));
+  $('clear').addEventListener('click',()=>{
+    if(!confirm('Clear the whole form?')) return;
+    const d = Object.assign({}, DEFAULTS); TEXT.forEach(k=>d[k]='');
+    edited = false; load(d); build();
+  });
+
+  function copyText(t, btn, label){
+    const done = ()=>{ btn.textContent='Copied'; btn.classList.add('done'); setTimeout(()=>{btn.textContent=label; btn.classList.remove('done');},1600); };
+    const fallback = ()=>{ const ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta); ta.select(); try{document.execCommand('copy'); done();}catch(e){ alert('Copying didn\'t work. Open "Show and edit the prompt", select the text and copy it yourself.'); } ta.remove(); };
+    if(navigator.clipboard && window.isSecureContext){ navigator.clipboard.writeText(t).then(done).catch(fallback); } else fallback();
+  }
+  $('copy').addEventListener('click',()=>copyText($('output').value, $('copy'), 'Copy prompt'));
+
+  // Refine phrases. quick:true ones show in Quick start; Advanced shows all.
+  const FIXES = [
+    {t:'Make it more visual: replace any text lists with an animated diagram students can interact with.', quick:true},
+    {t:'The Check button does nothing. Fix only that and change nothing else.', quick:true},
+    {t:'Give me the complete updated code as one HTML file, with nothing left out.', quick:true},
+    {t:'Make the main picture bigger and animate the change whenever a control moves.'},
+    {t:'Students can get everything right just by clicking. Make them predict or choose before any answer is shown.'},
+    {t:'This isn\'t working. Explain what\'s wrong in plain English, then fix it.'}
+  ];
+  function renderFixes(){
+    const fx = $('fixes'); fx.innerHTML = '';
+    FIXES.filter(f=>adv || f.quick).forEach(f=>{
+      const row = document.createElement('div'); row.className='fix';
+      const s = document.createElement('span'); s.textContent = f.t;
+      const b = document.createElement('button'); b.type='button'; b.className='btn'; b.textContent='Copy';
+      b.addEventListener('click',()=>copyText(f.t,b,'Copy'));
+      row.append(s,b); fx.append(row);
+    });
+  }
+
+  $('form').addEventListener('input', build);
+  $('form').addEventListener('change', build);
+  let saved = {};
+  try{ saved = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; }catch(e){}
+  load(saved);
+  if(saved.edited && saved.editedText){ edited = true; $('output').value = saved.editedText; }
+  setMode(!!saved.adv);
+})();
+</script>
+</body>
+</html>
