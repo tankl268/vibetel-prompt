@@ -5,9 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Vibe-TEL Prompt Generator</title>
 <meta name="description" content="Turn a teaching problem into a build prompt for an interactive, visual, single-file learning tool.">
-<!-- Vibe-TEL Prompt Generator v2.8 (2026-10-08; adds Interactive story, the Warm look and a Rural access example, tile descriptions in Quick start and an "About this choice" panel, for the College of Health workshop; fixes from automated testing).
+<!-- Vibe-TEL Prompt Generator v2.9 (2026-10-08; removes Interactive story for the workshop, as Gemini Flash rarely gets a story right first time; Rural access is now a branching scenario).
+     v2.8 (2026-10-08; adds Interactive story, the Warm look and a Rural access example, tile descriptions in Quick start and an "About this choice" panel, for the College of Health workshop; fixes from automated testing).
      v2.7 (2026-09-25): plainer wording, Evaluate as a short note, health promotion example, no Game mode, editable prompt. Quick start by default, Advanced as a toggle.
-     Earlier versions are in HERGA 2026/Archive (prompt-generator-v1, prompt-generator-v2.0, prompt-generator-v2.7). -->
+     Earlier versions are in HERGA 2026/Archive (prompt-generator-v1, prompt-generator-v2.0, prompt-generator-v2.7, prompt-generator-v2.8). -->
 <style>
 :root{
   --navy:#140f50; --blue:#1747ff; --blue-soft:#7f95ff; --lav:#7467c4;
@@ -71,6 +72,7 @@ input:focus,textarea:focus,select:focus{outline:3px solid rgba(23,71,255,.25);bo
 .inline-warn{margin:10px 0 0;background:#fff7e8;border-left:5px solid var(--amber);padding:8px 12px;border-radius:0 8px 8px 0;font-size:14px}
 /* interaction tiles */
 .tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.tile.wide{grid-column:span 2}
 @media (max-width:640px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}.tile label{flex-direction:column;align-items:flex-start;gap:6px}.tile svg{align-self:flex-start}}
 .tile{position:relative}
 .tile input{position:absolute;opacity:0;pointer-events:none}
@@ -199,8 +201,7 @@ footer{border-top:1px solid var(--line);padding:18px 20px;color:var(--muted);fon
           <div class="tile"><input type="radio" name="mode" id="m_scenario" value="scenario"><label for="m_scenario"><svg viewBox="0 0 34 34" aria-hidden="true"><circle cx="17" cy="6" r="4" fill="#1747ff"/><path d="M17 10 V17 M17 17 L7 27 M17 17 L27 27" stroke="#1b1840" stroke-width="2" fill="none"/><circle cx="7" cy="28" r="4" fill="#0e9f7e"/><circle cx="27" cy="28" r="4" fill="#ff5a1f"/></svg><span>Scenario<small>You decide; choices change the outcome</small></span></label></div>
           <div class="tile"><input type="radio" name="mode" id="m_lab" value="lab"><label for="m_lab"><svg viewBox="0 0 34 34" aria-hidden="true"><path d="M13 3 H21 M14 3 V13 L6 28 Q5 31 9 31 H25 Q29 31 28 28 L20 13 V3" fill="none" stroke="#1b1840" stroke-width="2"/><path d="M9 24 H25 L27.5 29 Q27 30 25 30 H9 Q7 30 7 29Z" fill="#0e9f7e"/></svg><span>Virtual lab<small>Do a procedure step by step</small></span></label></div>
           <div class="tile"><input type="radio" name="mode" id="m_data" value="data"><label for="m_data"><svg viewBox="0 0 34 34" aria-hidden="true"><rect x="4" y="18" width="5" height="12" fill="#7f95ff"/><rect x="12" y="10" width="5" height="20" fill="#1747ff"/><rect x="20" y="14" width="5" height="16" fill="#7467c4"/><path d="M3 26 Q12 4 31 8" stroke="#ff5a1f" stroke-width="2" fill="none"/></svg><span>Data explorer<small>Change the numbers, watch the chart</small></span></label></div>
-          <div class="tile"><input type="radio" name="mode" id="m_story" value="story"><label for="m_story"><svg viewBox="0 0 34 34" aria-hidden="true"><path d="M17 8 C13 5 7 5 3 6 V28 C7 27 13 27 17 30 Z" fill="#e7ebff" stroke="#1b1840" stroke-width="1.6" stroke-linejoin="round"/><path d="M17 8 C21 5 27 5 31 6 V28 C27 27 21 27 17 30 Z" fill="#fff" stroke="#1b1840" stroke-width="1.6" stroke-linejoin="round"/><path d="M20.5 13 H27 M20.5 17 H27 M20.5 21 H25" stroke="#7467c4" stroke-width="1.8" stroke-linecap="round"/><circle cx="10" cy="14" r="2.6" fill="#ff5a1f"/><path d="M6.5 22 Q10 17.5 13.5 22" fill="none" stroke="#0e9f7e" stroke-width="2" stroke-linecap="round"/></svg><span>Story<small>Walk beside one person's experience</small></span></label></div>
-          <div class="tile"><input type="radio" name="mode" id="m_auto" value="auto" checked><label for="m_auto"><svg viewBox="0 0 34 34" aria-hidden="true"><path d="M17 3 L19.5 13 L29 15 L19.5 17.5 L17 28 L14.5 17.5 L5 15 L14.5 13Z" fill="#7467c4"/><circle cx="27" cy="27" r="3" fill="#1747ff"/></svg><span>Let AI pick<small>Gemini chooses what fits</small></span></label></div>
+          <div class="tile wide"><input type="radio" name="mode" id="m_auto" value="auto" checked><label for="m_auto"><svg viewBox="0 0 34 34" aria-hidden="true"><path d="M17 3 L19.5 13 L29 15 L19.5 17.5 L17 28 L14.5 17.5 L5 15 L14.5 13Z" fill="#7467c4"/><circle cx="27" cy="27" r="3" fill="#1747ff"/></svg><span>Let AI pick<small>Gemini chooses what fits</small></span></label></div>
         </div>
         <div class="about" id="about" aria-live="polite"><span class="lbl">About this choice</span><div id="aboutBody"></div></div>
       </div>
@@ -230,7 +231,7 @@ footer{border-top:1px solid var(--line);padding:18px 20px;color:var(--muted);fon
         <textarea id="misc" placeholder="e.g. Adding one more nurse always cuts waiting time by the same amount"></textarea>
         <label for="terms">Words for the glossary <span class="opt">(separate with commas)</span></label>
         <input type="text" id="terms" placeholder="e.g. triage, throughput, bottleneck">
-        <label>Extras <span class="opt" id="extrasNote" hidden>(not used for a story)</span></label>
+        <label>Extras</label>
         <div class="checks">
           <label class="check"><input type="checkbox" id="s_levels" checked> Levels of difficulty</label>
           <label class="check"><input type="checkbox" id="s_hints"> Hints or worked example</label>
@@ -328,13 +329,8 @@ footer{border-top:1px solid var(--line);padding:18px 20px;color:var(--muted);fon
       'Students change inputs or choose data, and charts drawn with SVG or canvas update with smooth animation.',
       'Before each change, students predict the shape of the result. Then the tool compares the prediction with the result.',
       'Label axes clearly and add a plain-language reading of what the chart now shows.']},
-    story: {name:'Interactive story', text:[
-      'One person tells their own story, in the first person and present tense, in four or five short chapters. Each chapter starts with a title card (the chapter name, the time and place, and their age).',
-      'Each line of narration appears on its own and waits for a click, a tap or the Space key before the next one appears, so every reader goes at their own pace (this matters for readers whose first language is not English).',
-      'Once or twice in each chapter the reader does something small: chooses how the narrator or someone close to them responds, reads a text message, turns a page or makes a move in a game. A choice changes the next few lines and shows a different response, then the story carries on to the same ending.',
-      'A chapter menu lets readers pause, go back or skip a chapter.']},
     auto: {name:'', text:[
-      'Choose the interaction that best fits the idea (for example a simulation, drag and drop, a clickable diagram, a branching scenario, an interactive story or a virtual lab).',
+      'Choose the interaction that best fits the idea (for example a simulation, drag and drop, a clickable diagram, a branching scenario or a virtual lab).',
       'Favour hands-on manipulation of a visual model over reading text and clicking Next.']}
   };
   const STYLES = {
@@ -350,7 +346,6 @@ footer{border-top:1px solid var(--line);padding:18px 20px;color:var(--muted);fon
     drag:{name:'Drag and drop', does:'sort, match, order or label items, then check', best:'categories, sequences and labelling', eg:'ordering the steps of a process'},
     explore:{name:'Explorer', does:'click the parts of a large picture to learn what each part is and does', best:'structures, anatomy and places', eg:'the parts of the heart'},
     scenario:{name:'Scenario', does:'make the decisions in a realistic situation; each choice changes the outcome, followed by a debrief', best:'clinical reasoning and decision-making', eg:'a deteriorating patient on a night shift'},
-    story:{name:'Story', does:'follow one person\'s experience, told in their own words; small choices change moments, not the ending', best:'empathy, lived experience and how health systems feel from the inside', eg:'getting care in a small country town'},
     lab:{name:'Virtual lab', does:'carry out a procedure step by step, with realistic results and mistakes', best:'practical and laboratory skills', eg:'a serial dilution'},
     data:{name:'Data explorer', does:'change the numbers or the data and watch a chart update', best:'statistics, trends and evidence', eg:'how sample size changes an estimate'},
     auto:{name:'Let AI pick', does:'describe your idea and Gemini chooses the interaction that fits', best:'when you\'re not sure which to choose', eg:''}
@@ -372,10 +367,10 @@ footer{border-top:1px solid var(--line);padding:18px 20px;color:var(--muted);fon
     const v = {}; TEXT.forEach(k=>v[k] = (!adv && ADV_TEXT.includes(k)) ? '' : $(k).value.trim());
     const b = adv ? {s_levels:$('s_levels').checked, s_hints:$('s_hints').checked, s_score:$('s_score').checked}
                   : {s_levels:true, s_hints:false, s_score:false};
-    const mode = radio('mode') || 'auto', style = adv ? (radio('style') || 'clean') : 'clean', story = mode === 'story';
+    const mode = radio('mode') || 'auto', style = adv ? (radio('style') || 'clean') : 'clean';
     const out = [];
 
-    out.push('You are an expert learning designer and a creative front-end developer. Build a polished, highly interactive and visual learning tool that I, a teacher, will give to my own students (for example on a page in Canvas or Moodle). It should feel like a well-made ' + (story ? 'interactive story that students want to keep reading' : 'educational simulation that students want to explore') + ', and every part of it should help them learn the idea below.');
+    out.push('You are an expert learning designer and a creative front-end developer. Build a polished, highly interactive and visual learning tool that I, a teacher, will give to my own students (for example on a page in Canvas or Moodle). It should feel like a well-made educational simulation that students want to explore, and every part of it should help them learn the idea below.');
     out.push('## The idea\n' + v.idea);
     if(v.goal) out.push('## Learning goal\nBy the end, students can ' + endStop(lowerFirst(v.goal.replace(/^by the end,?\s*students can\s*/i,''))));
     const who = [];
@@ -387,15 +382,7 @@ footer{border-top:1px solid var(--line);padding:18px 20px;color:var(--muted);fon
     out.push('## Interaction' + (m.name ? ': ' + m.name : '') + '\n' + bullets(m.text));
 
     const pic = v.picture ? ': ' + lowerFirst(v.picture).replace(/[.]$/,'') + '.' : '.';
-    if(story) out.push('## Make it visual and alive\n' + bullets([
-      'Each chapter is set in a few full-width scenes drawn in SVG, showing the places and everyday objects that matter to the story' + (v.picture ? '. Include: ' + endStop(v.picture) : '.') + ' Never use a static picture.',
-      'Keep people simple (silhouettes or soft shapes) or out of frame, and let objects carry the meaning: a phone message, a calendar, a letter, a kitchen bench.',
-      'Narration sits in a caption card over the scene. Other people speak in speech bubbles, and text messages appear as phone notifications.',
-      'Gentle motion only: slow fades and small movements between lines and scenes, and nothing that flashes.',
-      'Style: ' + STYLES[style] + '. Clear typography and a tidy layout with plenty of space.',
-      'Open with a title screen (the title, one sentence on whose story this is, a short content note and a Begin button) and finish with an end screen.'
-    ]));
-    else out.push('## Make it visual and alive\n' + bullets([
+    out.push('## Make it visual and alive\n' + bullets([
       'Build the screen around one large interactive visual that represents the concept itself' + pic + ' Draw it with SVG or HTML canvas, never as a static picture.',
       'Students act on the visual directly, and it responds at once with smooth animation that shows cause and effect.',
       'Feedback is visual as well as written: highlights, colour changes and movement, then a short plain-language explanation.',
@@ -403,37 +390,22 @@ footer{border-top:1px solid var(--line);padding:18px 20px;color:var(--muted);fon
       'Open with a short start screen (title, one sentence on what students will learn, a Start button) and finish with a summary screen.'
     ]));
 
-    const teach = story ? [
-      'Students learn by seeing the situation from the inside: everyday details, feelings, and how other people respond and the difference it makes.',
-      'Choices are about what the narrator or the people around them do or say. There is no right or wrong choice: each one shows a different response and its effect.',
-      'Common misunderstandings come up through other characters' + (v.misc ? ', for example:\n' + lines(v.misc).map(x=>'  - '+x).join('\n') + '\n  What happens next in the story shows why they are wrong.' : ', and what happens next in the story shows why they are wrong.'),
-      'Never lecture inside the story. Keep the explanations for the end screen.'
-    ] : [
+    const teach = [
       'Students think before they see: they predict, choose or commit first, then see the result.',
       'Wrong answers are possible and tempting' + (v.misc ? ', drawn from these misconceptions:\n' + lines(v.misc).map(x=>'  - '+x).join('\n') : ', based on common student errors.'),
       'Never give the answer away in labels, headings, colours or hints before the student responds.',
       'Feedback explains why, names the specific error, and lets the student try again.'
     ];
-    if(story){
-      teach.push('Use accurate, standard content for this level. Do not invent statistics, laws or medical facts. Use respectful, person-first language.');
-      teach.push('The end screen has two or three reflection questions, a short plain-prose summary of the case (the key events and what they show), and a note that this is one person\'s experience.');
-    } else {
-      if(b.s_levels) teach.push('Two or three levels or stages, each a little harder than the last.');
-      teach.push('Use accurate, standard content for this level. Do not invent data, formulas or facts.');
-      teach.push('The summary screen restates the key idea in one or two sentences.');
-    }
+    if(b.s_levels) teach.push('Two or three levels or stages, each a little harder than the last.');
+    teach.push('Use accurate, standard content for this level. Do not invent data, formulas or facts.');
+    teach.push('The summary screen restates the key idea in one or two sentences.');
     out.push('## How students learn with it\n' + bullets(teach));
 
     const sup = ['A Help button that opens short, step-by-step instructions.',
       'A Glossary button with plain-language definitions' + (termList(v.terms) ? ', including: ' + termList(v.terms) + '.' : ' of the key terms.')];
-    if(story){
-      sup.push('A content note on the title screen, and a Support button on every screen listing relevant Australian support services.');
-      sup.push('A Start again button on the end screen.');
-    } else {
-      if(b.s_hints) sup.push('Hints or a worked example students can open before answering.');
-      if(b.s_score) sup.push('A score or points that rise only for correct predictions and answers.');
-      sup.push('A Reset button to start again.');
-    }
+    if(b.s_hints) sup.push('Hints or a worked example students can open before answering.');
+    if(b.s_score) sup.push('A score or points that rise only for correct predictions and answers.');
+    sup.push('A Reset button to start again.');
     out.push('## Learner support\n' + bullets(sup));
 
     out.push('## Technical requirements\n' + bullets([
@@ -444,14 +416,13 @@ footer{border-top:1px solid var(--line);padding:18px 20px;color:var(--muted);fon
       'A plain descriptive title based on the topic. No marketing content (logos, taglines, pricing, sign-up screens or testimonials) and no code or these instructions on screen.'
     ]));
     if(lines(v.other).length) out.push('## Other details\n' + bullets(lines(v.other).map(endStop)));
-    out.push('## Before you finish\n' + (story ? 'Keep each chapter to about six to ten lines so the whole story fits in one reply. ' : '') + 'Build the complete, polished version, not a minimal one. Check that every control, animation and button works. Then give me the whole file in a single code block, with no placeholders and nothing left out.\n\nAfter the code block, add a short section headed "Teacher check" that lists every fact, number, formula and correct answer used in the tool, so I can verify them before students see it.');
+    out.push('## Before you finish\nBuild the complete, polished version, not a minimal one. Check that every control, animation and button works. Then give me the whole file in a single code block, with no placeholders and nothing left out.\n\nAfter the code block, add a short section headed "Teacher check" that lists every fact, number, formula and correct answer used in the tool, so I can verify them before students see it.');
 
     const text = out.join('\n\n');
     // Once someone edits the prompt by hand, the form no longer overwrites it.
     if(!edited) $('output').value = v.idea ? text : '';
     refreshOutput();
     $('goalWarn').hidden = !(adv && META.test(v.goal));
-    $('extrasNote').hidden = !story;
     showAbout(mode);
   }
   function refreshOutput(){
@@ -516,10 +487,10 @@ footer{border-top:1px solid var(--line);padding:18px 20px;color:var(--muted);fon
       level:'Later-year undergraduate', discipline:'Nursing',
       misc:'A normal blood pressure means the patient is stable\nOne abnormal reading can wait until the next round',
       terms:'early warning score, escalation, ISBAR, tachypnoea'},
-    rural:{mode:'story', style:'warm',
-      idea:'Students think getting health care is mostly about whether a service exists. I want them to follow one person in a small country town who needs to see a specialist, told in their own words, so they see how distance, transport, cost, waiting and communication add up to whether care is within reach at all.',
+    rural:{mode:'scenario', style:'warm',
+      idea:'Students think getting health care is mostly about whether a service exists. I want them to help a person in a small country town get to a specialist appointment in the city, making the decisions about transport, cost, time off work and telehealth along the way, and see how each choice changes whether they get care at all.',
       goal:'explain how distance, transport, cost and the way services are organised affect access to care for people living in rural areas',
-      picture:'A small country town and the long road to the city: a kitchen table with an appointment letter, a phone, a bus stop, a clinic waiting room and a map showing the distance',
+      picture:'A map of a small country town and the long road to the city, with the person\'s appointment date, travel time and costs adding up beside it',
       level:'First-year undergraduate', discipline:'Public health',
       misc:'If a service exists somewhere, people can use it\nPeople in rural areas just need to plan better\nTelehealth solves access problems for everyone',
       terms:'access to care, social determinants of health, rural health, telehealth, health literacy',
